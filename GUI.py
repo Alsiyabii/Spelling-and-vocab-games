@@ -1,4 +1,3 @@
-# 0123456789012345678901234567890123456789012345678901234567890123456789012345678
 # Importing the relevant libraries
 from tkinter import *
 from tkinter import messagebox, ttk
@@ -6,6 +5,7 @@ import WordDefinitionSet
 import random
 import csv
 import words
+import os
 
 # Defining variables that will be used later in the code
 attempts1 = 5
@@ -55,6 +55,13 @@ exit_button = Button(root, text="-Exit-", fg='red',
 exit_button.grid(row=8, pady=20, columnspan=2)
 
 # defining the main functions used in the code
+# Complimentary code dealing with csv file before any other code or function
+if os.path.getsize("UserData.csv") == 0:
+    with open('UserData.csv', 'w') as file:
+        csv_writer = csv.writer(file)
+        csv_writer.writerow(['Username', 'Password', 'Score', 'Level'])
+
+
 """
 A function that exits the game, saves the score in the csv file, and writes the
 new sorted data
@@ -67,6 +74,7 @@ def exit_game(user_name, window1, window2):
     rows = []
     with open('UserData.csv', 'r') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
+        next(csv_reader)
         for row in csv_reader:
             if row[0] == user_name:
                 previous_score = row[2]
@@ -79,7 +87,7 @@ def exit_game(user_name, window1, window2):
                 elif new_score > 30:
                     row[3] = 'Experienced'
             rows.append(row)
-        sorted_list = sorted(rows[1:], key=lambda row: int(row[2]),
+        sorted_list = sorted(rows[0:], key=lambda row: int(row[2]),
                              reverse=True)
     with open('UserData.csv', 'w') as csv_file1:
         csv_writer = csv.writer(csv_file1)
@@ -197,7 +205,7 @@ def go_back(window_disappeared, window_appeared):
 def register():
     # Constructing the 'register' window and adding relevant labels and entries
     # The window, labels and entries are formatted to match the overall theme
-    register_window = Tk()
+    register_window = Toplevel()
     register_window.config(bg='DodgerBlue4'), register_window.title('Register')
     welcome_message = "Register"
     welcome_label = Label(register_window, text=welcome_message,
@@ -273,7 +281,7 @@ def login(user_name, password):
     global main_menu
     # Obtaining the user's overall score using the self created check_score func.
     score = check_score(username_entry.get())
-    main_menu = Tk()  # Constructing the main menu window
+    main_menu = Toplevel()  # Constructing the main menu window
     if validate_entry(user_name):  # Username validation process
         messagebox.showerror('Username not found', 'The username '
                                                    'entered was not found \n'
@@ -453,7 +461,7 @@ def login(user_name, password):
 
 
 # Game 1 window is created
-game1_window = Tk()
+game1_window = Toplevel()
 game1_window.withdraw(), game1_window.title('Guess the Definition')
 
 
@@ -580,12 +588,13 @@ def play_game1():
                          bd=0)
     back_button.grid(row=4, column=0, columnspan=4, pady=10)
 
-    # Creating the game's mainloop
-    game1_window.mainloop()
+    # Handling closing the window properly
+    game1_window.protocol("WM_DELETE_WINDOW", game1_window.destroy)
+    
 
 
 # Creating and configuring the main window of game 2
-game2_window = Tk()
+game2_window = Toplevel()
 (game2_window.config(bg='DodgerBlue4'),
  game2_window.title('Arrange and categorise'))
 # Withdrawing and hiding the window so that it appears only when play is clicked
@@ -790,8 +799,10 @@ def play_game2():
             attempts1 = 5
             ingame_score = 0
 
-    # The game loop is created after creating the game
-    game2_window.mainloop()
+    # Handling closing the window properly
+    game2_window.protocol("WM_DELETE_WINDOW", game2_window.destroy)
+
+    
 
 
 # Creating the mainloop of the first window
